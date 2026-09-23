@@ -78,13 +78,31 @@ section{padding-top:72px;display:flex;flex-direction:column;gap:20px}
 .lv span{color:var(--ink2);font-size:13.5px}
 .lv b{font:500 16px var(--mono)}
 /* calculator */
-.calc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 @media (max-width:640px){.calc{grid-template-columns:1fr}}
-.calc label{display:flex;flex-direction:column;gap:6px;font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
-.calc input{font:15px var(--mono);padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
-.calc input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.result{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--accent-dim);color:var(--ink);font-size:15px}
-.result strong{font-family:var(--mono);color:var(--accent);font-weight:500}
+.q{display:flex;flex-direction:column;gap:8px}
+.q>label{font-size:15px;font-weight:600;color:var(--ink)}
+.q .step{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.q .help{font-size:12.5px;color:var(--ink3);max-width:none}
+.field{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+.field:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.field span{font:15px var(--mono);color:var(--ink3);padding-inline:12px 0}
+.field span.after{padding-inline:0 12px}
+.field input{font:16px var(--mono);padding:12px;border:0;background:transparent;color:var(--ink);width:100%;min-width:0;box-sizing:border-box;outline:0}
+.q .conv{font:12.5px var(--mono);color:var(--ink2)}
+.q .conv:empty{display:none}
+details.adv{margin-top:14px;font-size:13px;color:var(--ink2)}
+details.adv summary{cursor:pointer;color:var(--ink2);width:fit-content}
+details.adv .field{max-width:280px;margin-top:8px}
+.answer{margin-top:18px;border-radius:14px;border:1px solid var(--border);background:var(--raised);padding:18px;display:flex;flex-direction:column;gap:10px}
+.answer .verdict{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.answer .big{font-size:clamp(20px,4.5vw,26px);font-weight:600;letter-spacing:-.02em;line-height:1.25;color:var(--ink)}
+.answer .big em{font-style:normal;font-family:var(--mono);color:var(--accent)}
+.answer p{font-size:14px;max-width:none}
+.answer p em{font-style:normal;font-weight:600;color:var(--ink)}
+.answer ol{margin:4px 0 0;padding-left:20px;color:var(--ink2);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.answer .muted{color:var(--ink3);font-size:12.5px}
+.answer.empty .big{font-size:17px;color:var(--ink2);font-weight:500}
 /* charts */
 .chart svg{display:block;width:100%;height:auto}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font:12px var(--mono);color:var(--ink2);margin-bottom:10px}
@@ -181,17 +199,33 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
 
 <section id="calc-sec">
   <div class="head">
-    <span class="eyebrow"><span class="dot"></span>Your order</span>
-    <h2>What to trade this week</h2>
+    <span class="eyebrow"><span class="dot"></span>Your move</span>
+    <h2>What should I do this week?</h2>
+    <p>Answer two questions and we'll turn this week's signal into a plain instruction for your own money. The strategy is simple: when the signal says <b style="color:var(--ink)">be in Bitcoin</b>, all of the money you've set aside is in Bitcoin. When it says <b style="color:var(--ink)">be in cash</b>, all of it is in cash.</p>
   </div>
   <div class="card">
     <form class="calc" id="calc" autocomplete="off">
-      <label for="c-btc">BTC you hold<input id="c-btc" inputmode="decimal" placeholder="0.05"></label>
-      <label for="c-usd">Cash for strategy ($)<input id="c-usd" inputmode="decimal" placeholder="3000"></label>
-      <label for="c-price">BTC price now ($)<input id="c-price" inputmode="decimal" placeholder="Uses Sunday close"></label>
+      <div class="q">
+        <span class="step">Question 1</span>
+        <label for="c-btc">How much Bitcoin do you own right now?</label>
+        <div class="field"><input id="c-btc" inputmode="decimal" placeholder="0"><span class="after">BTC</span></div>
+        <span class="conv" id="c-btc-usd"></span>
+        <p class="help">Check your exchange or wallet. Enter 0 if you don't own any.</p>
+      </div>
+      <div class="q">
+        <span class="step">Question 2</span>
+        <label for="c-usd">How much cash have you set aside for Bitcoin?</label>
+        <div class="field"><span>$</span><input id="c-usd" inputmode="decimal" placeholder="0"></div>
+        <span class="conv" id="c-usd-btc"></span>
+        <p class="help">Only money you're prepared to put into Bitcoin, not your whole bank balance. Enter 0 if it's all in Bitcoin already.</p>
+      </div>
     </form>
-    <div class="result" id="c-out">Enter what you hold to get an exact order.</div>
-    <p style="font-size:12.5px;margin-top:10px">Saved in this browser only. On Coinbase Advanced, a limit order at the current price pays the lower maker fee.</p>
+    <details class="adv"><summary>Use a different Bitcoin price</summary>
+      <p style="font-size:12.5px;margin-top:6px">We use this week's Sunday closing price by default. If the price has moved, enter what you see on your exchange for a more exact amount.</p>
+      <div class="field"><span>$</span><input id="c-price" inputmode="decimal" placeholder=""></div>
+    </details>
+    <div class="answer empty" id="c-out" aria-live="polite"><div class="big">Waiting for this week's signal…</div></div>
+    <p style="font-size:12.5px;margin-top:10px">Your numbers are saved on this device only and are never sent anywhere. This is the output of a rules-based strategy, not financial advice.</p>
   </div>
 </section>
 
@@ -329,14 +363,40 @@ function renderZone(ratio, ma, sma){
 /* ---------- calculator ---------- */
 const KEYS=["c-btc","c-usd","c-price"];
 function num(id){const x=parseFloat(($(id).value||"").replace(/[$,\s]/g,""));return isFinite(x)?x:0}
+const btcFmt=v=>v.toLocaleString("en-US",{maximumFractionDigits:6});
 function calc(){
-  const out=$("c-out"); if(!latest){out.textContent="Waiting for this week's signal.";return;}
+  const out=$("c-out"); out.textContent="";
+  const add=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;
+    html.split(/(<em>.*?<\/em>)/).forEach(p=>{if(p.startsWith("<em>")){const m=document.createElement("em");m.textContent=p.slice(4,-5);e.appendChild(m)}else if(p)e.append(p)});out.appendChild(e);return e};
+  if(!latest){out.className="answer empty";add("div","big","Waiting for this week's signal…");return;}
   const price=num("c-price")||latest.price, btc=num("c-btc"), cash=num("c-usd");
-  out.textContent=""; const s=t=>{const b=document.createElement("strong");b.textContent=t;return b};
-  if(btc*price+cash<=0){out.textContent="Enter what you hold to get an exact order.";return;}
-  if(latest.hold && cash>1) out.append("Buy ",s(usd(cash))," of BTC (≈ "+(cash/price).toFixed(6)+" BTC). The signal says be fully in.");
-  else if(!latest.hold && btc>0) out.append("Sell ",s(btc.toFixed(6)+" BTC")," (≈ "+usd(btc*price)+"). The signal says be in cash.");
-  else out.append(s("No trade."), latest.hold?" You're already in BTC.":" You're already in cash.");
+  $("c-price").placeholder=Math.round(latest.price).toLocaleString("en-US")+" (Sunday close)";
+  $("c-btc-usd").textContent=btc>0?"≈ "+usd(btc*price)+" at "+usd(price):"";
+  $("c-usd-btc").textContent=cash>0?"≈ "+btcFmt(cash/price)+" BTC at "+usd(price):"";
+  const inBtc=!!latest.hold, next=nextCheck();
+  const signal=inBtc?"This week's signal says <em>be in Bitcoin</em>.":"This week's signal says <em>be in cash</em>.";
+  const why=inBtc?(latest.trend==="UP"?"Bitcoin is above its 150-day average, so it's in an uptrend.":"Bitcoin is below its 200-week average, which has historically been a good time to buy.")
+                 :"Bitcoin is in a downtrend and isn't cheap enough yet to buy.";
+  if(btc*price+cash<=0){out.className="answer empty";add("div","big","Answer the two questions above to see what to do.");add("p","",signal.replace(/<\/?em>/g,"")+" "+why);return;}
+  out.className="answer";
+  const verdict=document.createElement("div");verdict.className="verdict";out.appendChild(verdict);
+  const pill=(a,t)=>{const p=document.createElement("span");p.className="pill p-"+a;p.textContent=t;verdict.appendChild(p)};
+  if(inBtc && cash>=1){
+    pill("BUY","Buy");
+    add("div","big",`Buy <em>${usd(cash)}</em> of Bitcoin`);
+    add("p","",`${signal} ${why} You have ${usd(cash)} in cash waiting, so the strategy moves it into Bitcoin (about ${btcFmt(cash/price)} BTC).`);
+    const ol=document.createElement("ol");["Open your exchange (for example Coinbase) and choose Buy Bitcoin.",`Enter ${usd(cash)} as the amount.`,"A limit order at the current price usually has lower fees than a market order.","Then leave it until the next signal."].forEach(t=>{const li=document.createElement("li");li.textContent=t;ol.appendChild(li)});out.appendChild(ol);
+  } else if(!inBtc && btc>0){
+    pill("SELL","Sell");
+    add("div","big",`Sell <em>${btcFmt(btc)} BTC</em> (about ${usd(btc*price)})`);
+    add("p","",`${signal} ${why} The strategy moves everything to cash and waits for a better moment to buy back in.`);
+    const ol=document.createElement("ol");["Open your exchange and choose Sell Bitcoin.",`Sell all ${btcFmt(btc)} BTC.`,"Keep the cash on hand. Selling can create a taxable gain, so keep a record.","Then wait for the next buy signal."].forEach(t=>{const li=document.createElement("li");li.textContent=t;ol.appendChild(li)});out.appendChild(ol);
+  } else {
+    pill("HOLD","No trade");
+    add("div","big",inBtc?"Do nothing. You're already in Bitcoin.":"Do nothing. You're already in cash.");
+    add("p","",`${signal} ${why} ${inBtc?"Keep holding your Bitcoin.":"Keep your cash where it is."}`);
+  }
+  add("p","muted",`Next check: ${next}. The signal only changes after Sunday's close, so there's nothing to do until then.`);
 }
 try{const v=JSON.parse(localStorage.getItem("btc-desk")||"{}");KEYS.forEach(k=>{if(v[k])$(k).value=v[k]})}catch(e){}
 KEYS.forEach(k=>$(k).addEventListener("input",()=>{try{const v={};KEYS.forEach(x=>v[x]=$(x).value);localStorage.setItem("btc-desk",JSON.stringify(v))}catch(e){} calc();}));
