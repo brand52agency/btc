@@ -1,4 +1,4 @@
-# BTC Signal Desk: standalone site
+# BTC Buy Strategy: standalone site
 
 A single `index.html` with no backend and no build step. When someone opens it, the browser pulls daily BTC prices
 (Coinbase first, then Binance's public data mirror) and computes this week's Trend + Value signal and the
