@@ -1,8 +1,11 @@
 // Page-view counter. Every page load POSTs here and the total goes up by one
 // (repeat visits count too). Stored in Upstash Redis, connected through the
 // Vercel Marketplace, which provides the env vars below.
-const URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Vercel may add a custom prefix to these names (e.g. STORAGE_KV_REST_API_URL),
+// so match on the suffix.
+const env = suffix => Object.entries(process.env).find(([k, v]) => k.endsWith(suffix) && v)?.[1];
+const URL = env("KV_REST_API_URL") || env("UPSTASH_REDIS_REST_URL");
+const TOKEN = env("KV_REST_API_TOKEN") || env("UPSTASH_REDIS_REST_TOKEN");
 const KEY = "pageviews:home";
 
 async function redis(cmd) {
