@@ -38,7 +38,12 @@ html,body{margin:0}body{background:var(--bg);color:var(--ink);font:14px/1.6 var(
 nav.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:20px;border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;white-space:nowrap;flex-shrink:0}
 .brand i{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font:600 12px var(--mono);color:#fff;font-style:normal}
-.ticker{display:inline-flex;align-items:baseline;gap:8px;padding:5px 11px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font:12px var(--mono);white-space:nowrap}
+.ticker{display:inline-flex;align-items:baseline;gap:8px;padding:5px 11px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font:12px var(--mono);white-space:nowrap;color:inherit;cursor:pointer;transition:border-color .2s,background .2s}
+.ticker:hover{border-color:var(--ink3)}
+.ticker:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ticker[aria-expanded="true"]{border-color:var(--accent);background:var(--accent-dim)}
+.ticker .chev{align-self:center;color:var(--ink3);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.ticker[aria-expanded="true"] .chev{transform:rotate(180deg);color:var(--accent)}
 .ticker .dot{align-self:center}
 .ticker b{font:500 13px var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
 .ticker small{font-size:11.5px;color:var(--ink3)}
@@ -47,6 +52,29 @@ nav.top{display:flex;justify-content:space-between;align-items:center;gap:16px;p
 .asof{display:flex;align-items:center;gap:8px;font:12px var(--mono);color:var(--ink3);max-width:none;margin-top:2px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
 @media (prefers-reduced-motion:no-preference){.pulse{animation:pulse 2s ease-in-out infinite}}
+/* week chart that drops down from the price pill */
+.drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}
+.drop.open{grid-template-rows:1fr}
+.drop>.inner{overflow:hidden;min-height:0}
+.drop .panel{margin-top:14px;padding:18px 18px 12px;border:1px solid var(--border);border-radius:var(--r);background:linear-gradient(180deg,var(--raised),var(--surface));opacity:0;transform:translateY(-14px) scale(.98);transform-origin:top right;transition:opacity .3s ease,transform .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 50px -20px rgba(238,104,51,.25)}
+.drop.open .panel{opacity:1;transform:none}
+.wk-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.wk-head .t{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.wk-head .px{font:500 26px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);margin-top:4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.wk-head .px small{font-size:13px}
+.wk-head .px small.up{color:var(--buy-trend)} .wk-head .px small.down{color:var(--sell)}
+.wk-close{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--ink2);cursor:pointer;display:grid;place-items:center}
+.wk-close:hover{color:var(--ink);border-color:var(--ink3)}
+.wk-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wk-read{font:12px var(--mono);color:var(--ink2);margin-top:10px;min-height:1.5em;font-variant-numeric:tabular-nums}
+.wk-read b{font-weight:500;color:var(--ink)}
+#wk-svg{width:100%;height:auto;display:block;touch-action:pan-y;margin-top:4px}
+#wk-svg .cd{transform-box:fill-box;transform-origin:center}
+.wk-foot{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;color:var(--ink3);margin-top:6px}
+.wk-foot span{font-family:var(--mono)}
+@media (prefers-reduced-motion:no-preference){.drop.open #wk-svg .cd{animation:cdgrow .55s cubic-bezier(.2,.8,.2,1) both}}
+@keyframes cdgrow{from{transform:scaleY(0);opacity:0}}
+@media (prefers-reduced-motion:reduce){.drop,.drop .panel,.ticker .chev{transition:none}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(238,104,51,.5)}50%{box-shadow:0 0 0 4px rgba(238,104,51,0)}}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--border);background:var(--surface);padding:5px 12px;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);width:fit-content}
 h1,h2,h3{letter-spacing:-.02em;margin:0;text-wrap:balance}
@@ -174,8 +202,19 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
 <div class="wrap">
 <nav class="top">
   <div class="brand"><i>₿</i>BTC Buy Strategy</div>
-  <div class="ticker" id="ticker" title="Current Bitcoin price (BTC/USD), updates every 30 seconds" aria-live="off"><span class="dot pulse"></span><b id="tk-price">BTC —</b><small id="tk-chg"></small></div>
+  <button type="button" class="ticker" id="ticker" aria-expanded="false" aria-controls="wk" title="Current Bitcoin price. Click to see the last 7 days"><span class="dot pulse"></span><b id="tk-price">BTC —</b><small id="tk-chg"></small><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
 </nav>
+<div class="drop" id="wk" aria-hidden="true">
+  <div class="inner"><div class="panel" role="region" aria-label="Bitcoin price, last 7 days">
+    <div class="wk-head">
+      <div><div class="t">BTC / USD · last 7 days</div><div class="px"><span id="wk-px">—</span><small id="wk-chg"></small></div></div>
+      <button type="button" class="wk-close" id="wk-close" aria-label="Close chart" tabindex="-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    </div>
+    <div class="wk-read" id="wk-read">Loading the last 7 days…</div>
+    <svg id="wk-svg" viewBox="0 0 900 300" role="img" aria-label="Candlestick chart of Bitcoin price over the last 7 days"></svg>
+    <div class="wk-foot"><span id="wk-range"></span><span id="wk-src"></span></div>
+  </div></div>
+</div>
 
 <header class="hero">
   <div class="grid-bg" aria-hidden="true"></div>
@@ -560,6 +599,78 @@ $("share").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(SHARE.url); done("Copied!"); }
   catch(e){ window.prompt("Copy this link to share:",SHARE.url); }
 });
+
+/* ---------- 7-day candle chart that drops down from the price pill ---------- */
+const WK={data:null,at:0,gran:0,hover:-1};
+async function weekCandles(gran){      // gran: 3600 (1h) or 21600 (6h); returns [{t,o,h,l,c}] ascending
+  const end=Date.now(), start=end-7*864e5;
+  try{
+    const r=await fetch(`https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=${gran}&start=${new Date(start).toISOString()}&end=${new Date(end).toISOString()}`);
+    if(!r.ok) throw new Error("coinbase "+r.status);
+    const a=(await r.json()).map(c=>({t:c[0]*1000,l:c[1],h:c[2],o:c[3],c:c[4]})).sort((x,y)=>x.t-y.t);
+    if(a.length<10) throw new Error("short"); return {a,src:"Coinbase"};
+  }catch(e){
+    const r=await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${gran===3600?"1h":"6h"}&startTime=${start}&limit=200`);
+    if(!r.ok) throw new Error("binance "+r.status);
+    return {a:(await r.json()).map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4]})),src:"Binance"};
+  }
+}
+const wkWhen=t=>new Date(t).toLocaleString(undefined,{weekday:"short",hour:"numeric"});
+function wkRead(i){
+  const a=WK.data.a, k=a[i], out=$("wk-read"); out.textContent="";
+  const add=(l,v)=>{out.append(l+" ");const b=document.createElement("b");b.textContent=usd(v);out.append(b,"  ")};
+  out.append(wkWhen(k.t)+(i===a.length-1?" (now)":"")+"  ·  "); add("O",k.o); add("H",k.h); add("L",k.l); add("C",k.c);
+}
+function drawWeek(){
+  const s=$("wk-svg"); s.textContent=""; const a=WK.data.a, n=a.length;
+  const W=Math.max(280,Math.round(s.getBoundingClientRect().width)||900), H=W<600?230:300;   // draw in real pixels so labels stay readable
+  s.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const L=4,R=W-74,T=10,B=H-26, step=(R-L)/n, cw=Math.max(1.5,step*0.62);
+  const lo=Math.min(...a.map(k=>k.l)), hi=Math.max(...a.map(k=>k.h)), pad=(hi-lo)*0.08, y0=lo-pad, y1=hi+pad;
+  const X=i=>L+step*(i+0.5), Y=v=>B-(B-T)*(v-y0)/(y1-y0);
+  const st=[100,200,250,500,1000,2000,2500,5000].find(v=>(y1-y0)/v<=(H<300?4:5))||10000;
+  const tagY=Y(a[n-1].c);
+  for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);if(Math.abs(y-tagY)>15)el("text",{x:R+8,y:y+3.5,class:"tick"},s).textContent=usd(v)}
+  let lastDay=new Date(a[0].t).getDate();
+  a.forEach((k,i)=>{const d=new Date(k.t); if(d.getDate()===lastDay) return; lastDay=d.getDate(); const x=L+step*i;
+    el("line",{x1:x,x2:x,y1:T,y2:B,stroke:"var(--border)","stroke-width":1,"stroke-dasharray":"2 4"},s);
+    el("text",{x:x+4,y:B+18,class:"tick"},s).textContent=d.toLocaleDateString(undefined,{weekday:"short"})});
+  const cross=el("line",{x1:0,x2:0,y1:T,y2:B,stroke:"var(--ink3)","stroke-width":1,opacity:0},s);
+  a.forEach((k,i)=>{const up=k.c>=k.o, col=up?"var(--buy-trend)":"var(--sell)", x=X(i);
+    const g=el("g",{class:"cd",style:`animation-delay:${Math.round(i/n*380)}ms`},s);
+    el("line",{x1:x,x2:x,y1:Y(k.h),y2:Y(k.l),stroke:col,"stroke-width":1.2},g);
+    const top=Y(Math.max(k.o,k.c)), bot=Y(Math.min(k.o,k.c));
+    el("rect",{x:x-cw/2,y:top,width:cw,height:Math.max(1,bot-top),fill:col,rx:Math.min(1.5,cw/4)},g)});
+  const last=a[n-1].c, ly=Y(last);
+  el("line",{x1:L,x2:R,y1:ly,y2:ly,stroke:"var(--accent)","stroke-width":1,"stroke-dasharray":"3 3"},s);
+  const tag=el("g",{},s); el("rect",{x:R+2,y:ly-10,width:76,height:20,rx:4,fill:"var(--accent)"},tag);
+  el("text",{x:R+8,y:ly+4,class:"tick",style:"fill:#fff"},tag).textContent=usd(last);
+  const pick=e=>{const b=s.getBoundingClientRect(), vx=(e.clientX-b.left)/b.width*W, i=Math.max(0,Math.min(n-1,Math.floor((vx-L)/step)));
+    cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i)); cross.setAttribute("opacity",1); wkRead(i)};
+  s.onpointermove=pick; s.onpointerdown=pick;
+  s.onpointerleave=()=>{cross.setAttribute("opacity",0); wkRead(n-1)};
+  const first=a[0].o, chg=last/first-1;
+  $("wk-px").textContent=usd(last); const c=$("wk-chg"); c.textContent=(chg>=0?"+":"−")+Math.abs(chg*100).toFixed(1)+"% this week"; c.className=chg>=0?"up":"down";
+  $("wk-range").textContent=`7-day low ${usd(lo)} · high ${usd(hi)}`;
+  $("wk-src").textContent=(WK.gran===3600?"1-hour":"6-hour")+" candles · "+WK.data.src;
+  wkRead(n-1);
+}
+async function loadWeek(){
+  const gran=$("wk").getBoundingClientRect().width<600?21600:3600;
+  if(WK.data && WK.gran===gran && Date.now()-WK.at<60000){ drawWeek(); return; }
+  try{ WK.data=await weekCandles(gran); WK.gran=gran; WK.at=Date.now(); drawWeek(); }
+  catch(e){ $("wk-read").textContent="Couldn't load the chart right now. Try again in a minute."; console.warn("week chart failed:",e.message); }
+}
+function setWeek(open){
+  const d=$("wk"), btn=$("ticker");
+  d.classList.toggle("open",open); d.setAttribute("aria-hidden",!open); btn.setAttribute("aria-expanded",open);
+  $("wk-close").tabIndex=open?0:-1;
+  if(open){ if(WK.data) drawWeek(); loadWeek(); }
+}
+$("ticker").addEventListener("click",()=>setWeek($("ticker").getAttribute("aria-expanded")!=="true"));
+$("wk-close").addEventListener("click",()=>{ setWeek(false); $("ticker").focus(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && $("wk").classList.contains("open")){ setWeek(false); $("ticker").focus(); } });
+let wkRz; window.addEventListener("resize",()=>{ clearTimeout(wkRz); wkRz=setTimeout(()=>{ if($("wk").classList.contains("open")&&WK.data) drawWeek(); },150); });
 
 /* ---------- live spot price in the nav ---------- */
 async function spotPrice(){
