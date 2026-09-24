@@ -494,7 +494,7 @@ trades();
 /* ---------- page-view counter (every load counts, repeat visits too) ---------- */
 fetch("/api/views",{method:"POST"}).then(r=>r.ok?r.json():null).then(j=>{
   if(!j||!isFinite(j.views)) return;
-  $("views-n").textContent=j.views.toLocaleString("en-US"); $("views").hidden=false;
+  $("views-n").textContent=j.views.toLocaleString("en-US"); $("views-n").nextElementSibling.textContent=j.views===1?"page view":"page views"; $("views").hidden=false;
 }).catch(()=>{});
 
 /* ---------- live spot price in the nav ---------- */
