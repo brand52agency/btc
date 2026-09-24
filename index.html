@@ -491,7 +491,7 @@ ol.rules li b{font-size:13px}
         <button type="button" class="chip" data-sats="100000" aria-pressed="false">Big thanks<small>100,000 sats</small></button>
         <button type="button" class="chip" data-sats="" aria-pressed="false">Custom<small>you choose</small></button>
       </div>
-      <div class="field" id="tip-custom-wrap" hidden><input id="tip-custom" inputmode="numeric" placeholder="Amount" aria-label="Custom amount in sats"><span class="after">sats</span></div>
+      <div class="field" id="tip-custom-wrap" hidden><input id="tip-custom" inputmode="numeric" placeholder="2,500 or more" aria-label="Custom amount in sats, minimum 2,500"><span class="after">sats</span></div>
       <div class="field"><input id="tip-note" maxlength="140" placeholder="Add a note (optional)" aria-label="Note to send with your tip"></div>
       <button type="button" class="tipbtn" id="tip-go"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span id="tip-go-label">Tip 5,000 sats</span></button>
       <p class="tipmsg" id="tip-msg" hidden></p>
@@ -853,9 +853,11 @@ let wkRz, lastW=innerWidth; window.addEventListener("resize",()=>{ clearTimeout(
 /* ---------- Lightning tips to btcstacker@getalby.com (LNURL-pay) ---------- */
 const LN_ADDR="btcstacker@getalby.com", LNURLP="https://getalby.com/.well-known/lnurlp/btcstacker";
 let SPOT=0, tipSats=5000, tipPoll=null;
+const TIP_MIN=2500;   // the receiving wallet currently refuses invoices below ~2,500 sats
 const satsFmt=n=>n.toLocaleString("en-US");
 const satsUsd=n=>{ const p=SPOT||(latest&&latest.price); return p?" (≈ $"+(n*p/1e8).toFixed(n*p/1e8<10?2:0)+")":""; };
-function tipLabel(){ $("tip-go-label").textContent=tipSats>0?`Tip ${satsFmt(tipSats)} sats${satsUsd(tipSats)}`:"Enter an amount"; $("tip-go").disabled=!(tipSats>0); }
+function tipLabel(){ const ok=tipSats>=TIP_MIN;
+  $("tip-go-label").textContent=ok?`Tip ${satsFmt(tipSats)} sats${satsUsd(tipSats)}`:tipSats>0?`Minimum tip is ${satsFmt(TIP_MIN)} sats`:"Enter an amount"; $("tip-go").disabled=!ok; }
 document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
   document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
   const custom=!c.dataset.sats; $("tip-custom-wrap").hidden=!custom;
@@ -867,14 +869,14 @@ function loadQR(){ return window.qrcode?Promise.resolve():new Promise((res,rej)=
 function tipError(t){ const m=$("tip-msg"); m.textContent=t; m.hidden=false; $("tip-inv").hidden=true; }
 async function copyText(t,btn){ const old=btn.textContent; try{ await navigator.clipboard.writeText(t); btn.textContent="Copied!"; }catch(e){ window.prompt("Copy this:",t); } setTimeout(()=>btn.textContent=old,1800); }
 $("tip-go").addEventListener("click",async()=>{
-  if(!(tipSats>0)) return; const btn=$("tip-go"); btn.disabled=true; $("tip-msg").hidden=true; clearInterval(tipPoll);
+  if(!(tipSats>=TIP_MIN)) return; const btn=$("tip-go"); btn.disabled=true; $("tip-msg").hidden=true; clearInterval(tipPoll);
   try{
     const meta=await fetch(LNURLP).then(r=>r.json()); if(meta.status==="ERROR") throw new Error(meta.reason||"unavailable");
     const ms=tipSats*1000; if(ms<meta.minSendable) throw new Error(`The minimum tip is ${satsFmt(Math.ceil(meta.minSendable/1000))} sats.`);
     if(meta.maxSendable>0&&ms>meta.maxSendable) throw new Error(`The maximum tip is ${satsFmt(Math.floor(meta.maxSendable/1000))} sats.`);
     const u=new URL(meta.callback); u.searchParams.set("amount",ms);
     const note=$("tip-note").value.trim(); if(note&&meta.commentAllowed) u.searchParams.set("comment",note.slice(0,meta.commentAllowed));
-    const inv=await fetch(u).then(r=>r.json()); if(inv.status==="ERROR"||!inv.pr) throw new Error(inv.reason||"No invoice returned.");
+    const inv=await fetch(u).then(r=>r.json()); if(inv.status==="ERROR"||inv.error||!inv.pr) throw new Error(inv.reason||inv.message||"No invoice returned.");
     $("tip-open").href="lightning:"+inv.pr; $("tip-copy").onclick=()=>copyText(inv.pr,$("tip-copy"));
     const st=$("tip-status"); st.className="status"; st.textContent=`Waiting for your ${satsFmt(tipSats)}-sat payment…`;
     $("tip-inv").hidden=false;
@@ -885,7 +887,7 @@ $("tip-go").addEventListener("click",async()=>{
       try{ const v=await fetch(inv.verify).then(r=>r.json()); if(v.settled){ clearInterval(tipPoll); st.className="status ok"; st.textContent="Received. Thank you for supporting the stack! 🧡"; } }catch(e){}
     },3000); }
   }catch(e){
-    tipError(/configured/i.test(e.message)?"Lightning tips can't be received right now. Please try again later.":"Couldn't create an invoice: "+e.message);
+    tipError(/configured|wallet error/i.test(e.message)?`Lightning tips can't be received for this amount right now. Try ${satsFmt(Math.max(TIP_MIN,5000))} sats or more, or send to the Lightning address instead.`:"Couldn't create an invoice: "+e.message);
   }finally{ btn.disabled=false; }
 });
 $("ln-copy").addEventListener("click",()=>copyText(LN_ADDR,$("ln-copy")));
