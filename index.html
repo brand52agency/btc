@@ -233,6 +233,62 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
 .foot .legal{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px}
 .foot .legal h3{font-size:13px;color:var(--ink)}
 .foot .legal p{color:var(--ink2);font-size:12.5px;line-height:1.6}
+
+/* phones: one step larger text for legibility */
+@media (max-width:640px){
+body{font-size:15.5px}
+.asof{font-size:13px}
+.wk-head .t{font-size:12px}
+.wk-head .px small{font-size:14px}
+.wk-read{font-size:13px}
+.wk-foot{font-size:12.5px}
+.eyebrow{font-size:12px}
+.stats span{font-size:12px}
+.stats small{font-size:13px}
+.pill{font-size:13px}
+.zone-labels{font-size:12px}
+.ztable{font-size:14.5px}
+.ztable th{font-size:12px}
+.lv span{font-size:14.5px}
+.q .step{font-size:12px}
+.q .help{font-size:13.5px}
+.q .conv{font-size:13.5px}
+details.adv{font-size:14px}
+.answer p{font-size:15.5px}
+.answer ol{font-size:15.5px}
+.answer .muted{font-size:13.5px}
+.zbtn.zreset{font-size:12.5px}
+.zhint{font-size:13px}
+.legend{font-size:13px}
+.tick{font-size:11.5px}
+.tabs button{font-size:13px}
+.kpi span{font-size:12px}
+.kpi small{font-size:13.5px}
+.yr b{font-size:14px}
+.yr div{font-size:14px}
+table.log{font-size:14px}
+table.log th{font-size:12px}
+ol.rules li b{font-size:13px}
+.chip{font-size:15.5px}
+.chip small{font-size:13px}
+.ghost{font-size:14.5px}
+.inv .status{font-size:14px}
+.tipmsg{font-size:14px}
+.addr code{font-size:15.5px}
+.steps{font-size:14.5px}
+.foot{font-size:13px}
+.foot p{font-size:13px}
+.disclaimer{font-size:13.5px}
+.disclaimer p{font-size:13.5px}
+.views span{font-size:14px}
+.share{font-size:15.5px}
+.foot .legal h3{font-size:14px}
+.foot .legal p{font-size:13.5px}
+[style*="font-size:12px"]{font-size:13px!important}
+[style*="font-size:12.5px"]{font-size:13.5px!important}
+[style*="font-size:13px"]{font-size:14px!important}
+[style*="font-size:13.5px"]{font-size:14.5px!important}
+}
 </style>
 
 </head><body>
@@ -595,6 +651,8 @@ function timeAxis(svg,dates,X,top,bottom){
   dates.forEach((d,i)=>{ const k=key(d); if(k===prev) return; prev=k; if(!keep(d)) return; const x=X(i); if(x-lastX<48) return; lastX=x;
     el("line",{x1:x,x2:x,y1:top,y2:bottom,stroke:"var(--border)","stroke-width":1},svg); el("text",{x,y:bottom+16,"text-anchor":"middle",class:"tick"},svg).textContent=fmt(d); });
 }
+/* size an SVG to its real on-screen width so text isn't shrunk on phones */
+function fitSvg(svg,hDesk,hPhone){ const W=Math.max(280,Math.round(svg.getBoundingClientRect().width)||900), H=W<600?hPhone:hDesk; svg.setAttribute("viewBox",`0 0 ${W} ${H}`); return {W,H,L:W<600?48:62,R:W-(W<600?6:10)}; }
 let PERIOD_FROM="2021-01-01", RECENT=null;
 const ZEQ=makeZoom($("c-eq"),$("z-eq"),()=>drawEq(PERIOD_FROM));
 const ZPX=makeZoom($("c-px"),$("z-px"),()=>drawPx(PERIOD_FROM));
@@ -605,7 +663,7 @@ function drawEq(from){
   const k0=D.d.length-all.length, S=D.s.slice(k0), B=D.b.slice(k0), s0=S[0], b0=B[0];   // $10k at the start of the period
   const [i0,i1]=ZEQ.win(all.length), dates=all.slice(i0,i1+1);
   const sv=S.slice(i0,i1+1).map(v=>1e4*v/s0), bv=B.slice(i0,i1+1).map(v=>1e4*v/b0);
-  const L=62,R=890,T=12,Bt=270,n=dates.length,X=i=>L+(R-L)*i/(n-1);
+  const {H:Hh,L,R}=fitSvg(s,300,240), T=12,Bt=Hh-30,n=dates.length,X=i=>L+(R-L)*i/(n-1);
   const lo=Math.min(...sv,...bv)*0.9, hi=Math.max(...sv,...bv)*1.1, Y=v=>Bt-(Bt-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
   logTicks(lo,hi).forEach(v=>{const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=big(v)});
   timeAxis(s,dates,X,T,Bt);
@@ -620,7 +678,7 @@ function drawPx(from){
   const s=$("c-px"); s.textContent=""; const P=H.price, k0=P.d.findIndex(d=>d>=from), N=P.d.length-k0;
   const [i0,i1]=ZPX.win(N), a=k0+i0, b=k0+i1+1, dates=P.d.slice(a,b);
   const p=P.p.slice(a,b), sma=P.sma.slice(a,b), ma=P.ma.slice(a,b), h=P.h.slice(a,b);
-  const L=62,R=890,T=12,Bt=310,n=dates.length,X=i=>L+(R-L)*i/(n-1);
+  const {H:Hh,L,R}=fitSvg(s,340,270), T=12,Bt=Hh-30,n=dates.length,X=i=>L+(R-L)*i/(n-1);
   const all=[...p,...ma.filter(v=>v)], lo=Math.min(...all)*0.85, hi=Math.max(...all)*1.15;
   const Y=v=>Bt-(Bt-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
   h.forEach((v,i)=>{if(!v)return;const x0=i?(X(i-1)+X(i))/2:X(0),x1=i<n-1?(X(i)+X(i+1))/2:X(n-1);el("rect",{x:x0,y:T,width:Math.max(0,x1-x0)+0.3,height:Bt-T,fill:"var(--accent)","fill-opacity":0.13},s)});
@@ -640,7 +698,7 @@ function drawRecent(Dfull,Tall){
   const s=$("c-6m"); s.textContent=""; if(Dfull.d.length<2) return;
   const [i0,i1]=Z6M.win(Dfull.d.length), cut=a=>a.slice(i0,i1+1), D={d:cut(Dfull.d),p:cut(Dfull.p),sma:cut(Dfull.sma),ma:cut(Dfull.ma),h:cut(Dfull.h)}, n=D.d.length;
   const endD=i1<Dfull.d.length-1?Dfull.d[i1+1]:"9999", T=Tall.filter(t=>t.d<endD);
-  const L=62,R=890,Tp=12,Bt=310,X=i=>L+(R-L)*i/(n-1);
+  const {H:Hh,L,R}=fitSvg(s,340,270), Tp=12,Bt=Hh-30,X=i=>L+(R-L)*i/(n-1);
   const all=[...D.p,...D.sma,...D.ma].filter(v=>v), lo=Math.min(...all)*0.97, hi=Math.max(...all)*1.03;
   const Y=v=>Bt-(Bt-Tp)*(v-lo)/(hi-lo);
   D.h.forEach((v,i)=>{if(!v)return;const x0=i?(X(i-1)+X(i))/2:X(0),x1=i<n-1?(X(i)+X(i+1))/2:X(n-1);el("rect",{x:x0,y:Tp,width:Math.max(0,x1-x0)+0.3,height:Bt-Tp,fill:"var(--accent)","fill-opacity":0.13},s)});
@@ -790,7 +848,7 @@ function setWeek(open){
 $("ticker").addEventListener("click",()=>setWeek($("ticker").getAttribute("aria-expanded")!=="true"));
 $("wk-close").addEventListener("click",()=>{ setWeek(false); $("ticker").focus(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape" && $("wk").classList.contains("open")){ setWeek(false); $("ticker").focus(); } });
-let wkRz; window.addEventListener("resize",()=>{ clearTimeout(wkRz); wkRz=setTimeout(()=>{ if($("wk").classList.contains("open")&&WK.data) drawWeek(); },150); });
+let wkRz, lastW=innerWidth; window.addEventListener("resize",()=>{ clearTimeout(wkRz); wkRz=setTimeout(()=>{ if($("wk").classList.contains("open")&&WK.data) drawWeek(); if(innerWidth!==lastW){ lastW=innerWidth; drawEq(PERIOD_FROM); drawPx(PERIOD_FROM); RECENT&&drawRecent(RECENT.D,RECENT.T); } },150); });
 
 /* ---------- Lightning tips to btcstacker@getalby.com (LNURL-pay) ---------- */
 const LN_ADDR="btcstacker@getalby.com", LNURLP="https://getalby.com/.well-known/lnurlp/btcstacker";
