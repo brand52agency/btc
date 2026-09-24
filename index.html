@@ -333,7 +333,7 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
 
 <footer class="foot">
   <div class="social">
-  <div class="views" id="views" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><b id="views-n"></b><span>page views</span></div>
+  <div class="views" id="views" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><b id="views-n"></b><span>signal checks</span></div>
     <button type="button" class="share" id="share" aria-label="Share this site with a friend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span id="share-label">Share</span></button>
   </div>
   <div class="legal" id="disclaimer">
@@ -510,7 +510,7 @@ trades();
 /* ---------- page-view counter (every load counts, repeat visits too) ---------- */
 fetch("/api/views",{method:"POST"}).then(r=>r.ok?r.json():null).then(j=>{
   if(!j||!isFinite(j.views)) return;
-  $("views-n").textContent=j.views.toLocaleString("en-US"); $("views-n").nextElementSibling.textContent=j.views===1?"page view":"page views"; $("views").hidden=false;
+  $("views-n").textContent=j.views.toLocaleString("en-US"); $("views-n").nextElementSibling.textContent=j.views===1?"signal check":"signal checks"; $("views").hidden=false;
 }).catch(()=>{});
 
 /* ---------- share button: phone share sheet, or copy the link ---------- */
