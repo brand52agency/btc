@@ -72,7 +72,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;gap:16px;p
 #wk-svg .cd{transform-box:fill-box;transform-origin:center}
 .wk-foot{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;color:var(--ink3);margin-top:6px}
 .wk-foot span{font-family:var(--mono)}
-@media (prefers-reduced-motion:no-preference){.drop.open #wk-svg .cd{animation:cdgrow .55s cubic-bezier(.2,.8,.2,1) both}}
+@media (prefers-reduced-motion:no-preference){.drop.open #wk-svg.anim .cd{animation:cdgrow .55s cubic-bezier(.2,.8,.2,1) both}}
 @keyframes cdgrow{from{transform:scaleY(0);opacity:0}}
 @media (prefers-reduced-motion:reduce){.drop,.drop .panel,.ticker .chev{transition:none}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(238,104,51,.5)}50%{box-shadow:0 0 0 4px rgba(238,104,51,0)}}
@@ -147,6 +147,17 @@ details.adv .field{max-width:280px;margin-top:8px}
 .answer.empty .big{font-size:17px;color:var(--ink2);font-weight:500}
 /* charts */
 .chart svg{display:block;width:100%;height:auto}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.chead h3{margin:0}
+.zbar{display:flex;gap:4px;flex-shrink:0}
+.zbtn{min-width:30px;height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink2);font:500 15px var(--mono);line-height:1;cursor:pointer}
+.zbtn:hover:not(:disabled){color:var(--ink);border-color:var(--ink3)}
+.zbtn:disabled{opacity:.35;cursor:default}
+.zbtn.zreset{font-size:11.5px;letter-spacing:.04em;color:var(--accent)}
+.zbtn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.zoomable{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.zoomable.zoomed{cursor:grab} .zoomable.zoomed:active{cursor:grabbing}
+.zhint{font-size:12px;color:var(--ink3);max-width:none;margin-top:-6px}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font:12px var(--mono);color:var(--ink2);margin-bottom:10px}
 .legend i{display:inline-block;width:14px;height:2px;margin-right:7px;vertical-align:middle}
 .legend i.sq{width:10px;height:10px;border-radius:2px}
@@ -208,10 +219,10 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
   <div class="inner"><div class="panel" role="region" aria-label="Bitcoin price, last 7 days">
     <div class="wk-head">
       <div><div class="t">BTC / USD · last 7 days</div><div class="px"><span id="wk-px">—</span><small id="wk-chg"></small></div></div>
-      <button type="button" class="wk-close" id="wk-close" aria-label="Close chart" tabindex="-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+      <div class="zbar"><div class="zbar" id="z-wk"></div><button type="button" class="wk-close" id="wk-close" aria-label="Close chart" tabindex="-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button></div>
     </div>
     <div class="wk-read" id="wk-read">Loading the last 7 days…</div>
-    <svg id="wk-svg" viewBox="0 0 900 300" role="img" aria-label="Candlestick chart of Bitcoin price over the last 7 days"></svg>
+    <svg id="wk-svg" class="zoomable" viewBox="0 0 900 300" role="img" aria-label="Candlestick chart of Bitcoin price over the last 7 days"></svg>
     <div class="wk-foot"><span id="wk-range"></span><span id="wk-src"></span></div>
   </div></div>
 </div>
@@ -305,15 +316,16 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
     <button type="button" id="t-full" aria-pressed="false">2015 – today</button>
   </div>
   <div class="kpis" id="kpis"></div>
+  <p class="zhint">Zoom any chart with the + and − buttons, by pinching on a phone, or with ⌘/Ctrl + scroll or a double-click on a computer. Drag to move around once zoomed.</p>
 
   <div class="card chart">
-    <h3 style="margin-bottom:10px">Growth of $10,000</h3>
+    <div class="chead"><h3>Growth of $10,000</h3><div class="zbar" id="z-eq"></div></div>
     <div class="legend"><span><i style="background:var(--accent);height:3px"></i>Trend + Value</span><span><i style="background:var(--ink3)"></i>Buy &amp; hold BTC</span></div>
-    <svg id="c-eq" viewBox="0 0 900 300" role="img" aria-label="Growth of 10,000 dollars, strategy versus buy and hold"></svg>
+    <svg id="c-eq" class="zoomable" viewBox="0 0 900 300" role="img" aria-label="Growth of 10,000 dollars, strategy versus buy and hold"></svg>
   </div>
 
   <div class="card chart">
-    <h3 style="margin-bottom:10px">Every buy and sell</h3>
+    <div class="chead"><h3>Every buy and sell</h3><div class="zbar" id="z-px"></div></div>
     <div class="legend">
       <span><i style="background:var(--ink)"></i>BTC price</span>
       <span><i style="background:var(--ink2);border-top:1px dashed var(--ink2);height:0"></i>150-day avg</span>
@@ -323,12 +335,12 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
       <span><i class="ci" style="background:var(--buy-value)"></i>Value buy</span>
       <span><i class="ci" style="background:var(--sell)"></i>Sell</span>
     </div>
-    <svg id="c-px" viewBox="0 0 900 340" role="img" aria-label="Bitcoin price with holding periods and trades"></svg>
+    <svg id="c-px" class="zoomable" viewBox="0 0 900 340" role="img" aria-label="Bitcoin price with holding periods and trades"></svg>
     <p style="font-size:12px;margin-top:8px">Log scale.</p>
   </div>
 
   <div class="card chart">
-    <h3 style="margin-bottom:4px">Last 6 months up close</h3>
+    <div class="chead" style="margin-bottom:4px"><h3>Last 6 months up close</h3><div class="zbar" id="z-6m"></div></div>
     <p style="font-size:12.5px;margin-bottom:10px" id="c-6m-note">Daily prices, updated every day from live data.</p>
     <div class="legend">
       <span><i style="background:var(--ink)"></i>BTC price</span>
@@ -339,7 +351,7 @@ ol.rules li b{font:500 12px var(--mono);color:var(--accent);letter-spacing:.06em
       <span><i class="ci" style="background:var(--buy-value)"></i>Value buy</span>
       <span><i class="ci" style="background:var(--sell)"></i>Sell</span>
     </div>
-    <svg id="c-6m" viewBox="0 0 900 340" role="img" aria-label="Bitcoin price over the last 6 months with holding periods and trades"></svg>
+    <svg id="c-6m" class="zoomable" viewBox="0 0 900 340" role="img" aria-label="Bitcoin price over the last 6 months with holding periods and trades"></svg>
   </div>
 
   <div>
@@ -480,20 +492,60 @@ KEYS.forEach(k=>$(k).addEventListener("input",()=>{try{const v={};KEYS.forEach(x
 $("calc").addEventListener("submit",e=>e.preventDefault());
 
 /* ---------- static history ---------- */
-function axisX(svg,dates,X,top,bottom,every){ const seen=new Set(); dates.forEach((d,i)=>{const y=+d.slice(0,4); if(seen.has(y)) return; if(d.slice(5,7)!=="01") return; seen.add(y); if(y%every) return; const x=X(i);
-  el("line",{x1:x,x2:x,y1:top,y2:bottom,stroke:"var(--border)","stroke-width":1},svg); el("text",{x,y:bottom+16,"text-anchor":"middle",class:"tick"},svg).textContent=y; }); }
 function path(xs,ys){let s="",pen=false;xs.forEach((x,i)=>{const y=ys[i];if(y==null||!isFinite(y)){pen=false;return}s+=(pen?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);pen=true});return s}
 function logTicks(lo,hi){const out=[];for(let e=Math.floor(Math.log10(lo));e<=Math.ceil(Math.log10(hi));e++)[1,2,5].forEach(m=>{const v=m*10**e;if(v>=lo&&v<=hi)out.push(v)});return out}
 
+/* ---------- zoom: +/− buttons, pinch, ⌘/Ctrl+scroll (or trackpad pinch), double-click; drag to pan ---------- */
+function makeZoom(svg,bar,redraw,minPts=8){
+  const z={a:0,b:1,n:2};                 // visible window as fractions of the full data range
+  z.win=n=>{ z.n=n; const i0=Math.max(0,Math.floor(z.a*(n-1)+1e-9)), i1=Math.min(n-1,Math.ceil(z.b*(n-1)-1e-9)); ui(); return [i0,Math.max(i1,i0+1)]; };
+  const minSpan=()=>Math.min(1,minPts/Math.max(1,z.n-1));
+  const set=(a,sp)=>{ sp=Math.max(minSpan(),Math.min(1,sp)); a=Math.max(0,Math.min(1-sp,a)); if(Math.abs(a-z.a)<1e-6&&Math.abs(a+sp-z.b)<1e-6) return; z.a=a; z.b=a+sp; redraw(); };
+  z.zoom=(f,c)=>{ const sp=z.b-z.a, g=z.a+c*sp, ns=Math.max(minSpan(),Math.min(1,sp*f)); set(g-c*ns,ns); };
+  z.reset=()=>{ z.a=0; z.b=1; };
+  const mk=(txt,label,fn)=>{ const b=document.createElement("button"); b.type="button"; b.className="zbtn"; b.textContent=txt; b.title=label; b.setAttribute("aria-label",label); b.onclick=fn; bar.appendChild(b); return b; };
+  const rs=mk("Reset","Reset zoom",()=>{ z.reset(); redraw(); }), out=mk("−","Zoom out",()=>z.zoom(2,0.5)), inn=mk("+","Zoom in",()=>z.zoom(0.5,0.5));
+  rs.classList.add("zreset");
+  function ui(){ const zoomed=z.b-z.a<0.999; out.disabled=!zoomed; rs.hidden=!zoomed; inn.disabled=z.b-z.a<=minSpan()+1e-9; svg.classList.toggle("zoomed",zoomed); }
+  const frac=x=>{ const r=svg.getBoundingClientRect(); return Math.max(0,Math.min(1,(x-r.left)/r.width)); };
+  svg.addEventListener("wheel",e=>{ if(!(e.ctrlKey||e.metaKey)) return; e.preventDefault(); z.zoom(Math.exp(Math.max(-50,Math.min(50,e.deltaY))*0.01),frac(e.clientX)); },{passive:false});
+  svg.addEventListener("dblclick",e=>{ e.preventDefault(); z.zoom(e.shiftKey?2:0.5,frac(e.clientX)); });
+  const pts=new Map(); let pinch=0;
+  svg.addEventListener("pointerdown",e=>{ if(e.pointerType==="mouse"&&e.button!==0) return; pts.set(e.pointerId,e.clientX); pinch=0; try{svg.setPointerCapture(e.pointerId)}catch(_){} });
+  svg.addEventListener("pointermove",e=>{ if(!pts.has(e.pointerId)) return; const prev=pts.get(e.pointerId); pts.set(e.pointerId,e.clientX);
+    if(pts.size===2){ const [x1,x2]=[...pts.values()], d=Math.abs(x1-x2); if(pinch>20&&d>20) z.zoom(pinch/d,frac((x1+x2)/2)); pinch=d; return; }
+    if(pts.size===1&&z.b-z.a<0.999){ const dx=(e.clientX-prev)/svg.getBoundingClientRect().width*(z.b-z.a); set(z.a-dx,z.b-z.a); } });
+  const up=e=>{ pts.delete(e.pointerId); pinch=0; };
+  ["pointerup","pointercancel"].forEach(t=>svg.addEventListener(t,up));
+  ui(); return z;
+}
+/* date labels that adapt to how far you're zoomed in (dates are ISO yyyy-mm-dd) */
+function timeAxis(svg,dates,X,top,bottom){
+  const n=dates.length, days=(Date.parse(dates[n-1])-Date.parse(dates[0]))/864e5, M=d=>+d.slice(5,7);
+  const mon=d=>new Date(d+"T00:00:00Z").toLocaleString("en-US",{month:"short",timeZone:"UTC"});
+  const [key,keep,fmt]= days>2200?[d=>d.slice(0,4),d=>+d.slice(0,4)%2===0,d=>d.slice(0,4)]
+    : days>700?[d=>d.slice(0,4),()=>1,d=>d.slice(0,4)]
+    : days>400?[d=>d.slice(0,7),d=>(M(d)-1)%3===0,d=>M(d)===1?d.slice(0,4):mon(d)]
+    : days>75?[d=>d.slice(0,7),()=>1,d=>M(d)===1?mon(d)+" ’"+d.slice(2,4):mon(d)]
+    : [d=>d,()=>1,d=>mon(d)+" "+(+d.slice(8,10))];
+  let prev=key(dates[0]), lastX=-1e9;
+  dates.forEach((d,i)=>{ const k=key(d); if(k===prev) return; prev=k; if(!keep(d)) return; const x=X(i); if(x-lastX<48) return; lastX=x;
+    el("line",{x1:x,x2:x,y1:top,y2:bottom,stroke:"var(--border)","stroke-width":1},svg); el("text",{x,y:bottom+16,"text-anchor":"middle",class:"tick"},svg).textContent=fmt(d); });
+}
+let PERIOD_FROM="2021-01-01", RECENT=null;
+const ZEQ=makeZoom($("c-eq"),$("z-eq"),()=>drawEq(PERIOD_FROM));
+const ZPX=makeZoom($("c-px"),$("z-px"),()=>drawPx(PERIOD_FROM));
+const Z6M=makeZoom($("c-6m"),$("z-6m"),()=>RECENT&&drawRecent(RECENT.D,RECENT.T),10);
 function sliceFrom(arr,dates,from){const i=dates.findIndex(d=>d>=from);return arr.slice(i)}
 function drawEq(from){
-  const s=$("c-eq"); s.textContent=""; const D=H.eq, dates=sliceFrom(D.d,D.d,from);
-  const i0=D.d.length-dates.length, S=D.s.slice(i0), B=D.b.slice(i0), s0=S[0], b0=B[0];
-  const sv=S.map(v=>1e4*v/s0), bv=B.map(v=>1e4*v/b0);
+  const s=$("c-eq"); s.textContent=""; const D=H.eq, all=sliceFrom(D.d,D.d,from);
+  const k0=D.d.length-all.length, S=D.s.slice(k0), B=D.b.slice(k0), s0=S[0], b0=B[0];   // $10k at the start of the period
+  const [i0,i1]=ZEQ.win(all.length), dates=all.slice(i0,i1+1);
+  const sv=S.slice(i0,i1+1).map(v=>1e4*v/s0), bv=B.slice(i0,i1+1).map(v=>1e4*v/b0);
   const L=62,R=890,T=12,Bt=270,n=dates.length,X=i=>L+(R-L)*i/(n-1);
   const lo=Math.min(...sv,...bv)*0.9, hi=Math.max(...sv,...bv)*1.1, Y=v=>Bt-(Bt-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
   logTicks(lo,hi).forEach(v=>{const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=big(v)});
-  axisX(s,dates,X,T,Bt,from<"2020"?2:1);
+  timeAxis(s,dates,X,T,Bt);
   const xs=dates.map((_,i)=>X(i));
   el("path",{d:path(xs,bv.map(Y)),fill:"none",stroke:"var(--ink3)","stroke-width":1.5},s);
   el("path",{d:path(xs,sv.map(Y)),fill:"none",stroke:"var(--accent)","stroke-width":2.4,"stroke-linejoin":"round"},s);
@@ -502,35 +554,36 @@ function drawEq(from){
   el("text",{x:X(n-1)-8,y:Y(bv[n-1])+18,"text-anchor":"end",class:"tick"},s).textContent=big(bv[n-1]);
 }
 function drawPx(from){
-  const s=$("c-px"); s.textContent=""; const P=H.price, i0=P.d.findIndex(d=>d>=from), dates=P.d.slice(i0);
-  const p=P.p.slice(i0), sma=P.sma.slice(i0), ma=P.ma.slice(i0), h=P.h.slice(i0);
+  const s=$("c-px"); s.textContent=""; const P=H.price, k0=P.d.findIndex(d=>d>=from), N=P.d.length-k0;
+  const [i0,i1]=ZPX.win(N), a=k0+i0, b=k0+i1+1, dates=P.d.slice(a,b);
+  const p=P.p.slice(a,b), sma=P.sma.slice(a,b), ma=P.ma.slice(a,b), h=P.h.slice(a,b);
   const L=62,R=890,T=12,Bt=310,n=dates.length,X=i=>L+(R-L)*i/(n-1);
   const all=[...p,...ma.filter(v=>v)], lo=Math.min(...all)*0.85, hi=Math.max(...all)*1.15;
   const Y=v=>Bt-(Bt-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
   h.forEach((v,i)=>{if(!v)return;const x0=i?(X(i-1)+X(i))/2:X(0),x1=i<n-1?(X(i)+X(i+1))/2:X(n-1);el("rect",{x:x0,y:T,width:Math.max(0,x1-x0)+0.3,height:Bt-T,fill:"var(--accent)","fill-opacity":0.13},s)});
   logTicks(lo,hi).forEach(v=>{const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=big(v)});
-  axisX(s,dates,X,T,Bt,from<"2020"?2:1);
+  timeAxis(s,dates,X,T,Bt);
   const xs=dates.map((_,i)=>X(i));
   el("path",{d:path(xs,ma.map(v=>v?Y(v):null)),fill:"none",stroke:"var(--buy-value)","stroke-width":1.5},s);
   el("path",{d:path(xs,sma.map(v=>v?Y(v):null)),fill:"none",stroke:"var(--ink2)","stroke-width":1.2,"stroke-dasharray":"4 4"},s);
   el("path",{d:path(xs,p.map(Y)),fill:"none",stroke:"var(--ink)","stroke-width":1.6,"stroke-linejoin":"round"},s);
-  const idxOf=d=>{let k=dates.findIndex(x=>x>=d);return k<0?n-1:k};
-  H.trades.filter(t=>t.d>=from).forEach(t=>{const i=idxOf(t.d);const c=t.s==="S"?"var(--sell)":t.r==="value"?"var(--buy-value)":"var(--buy-trend)";
+  const idxOf=d=>{let k=dates.findIndex(x=>x>=d);return k<0?n-1:k}, end=P.d[Math.min(b,P.d.length-1)];
+  H.trades.filter(t=>t.d>=dates[0]&&(b>=P.d.length||t.d<end)).forEach(t=>{const i=idxOf(t.d);const c=t.s==="S"?"var(--sell)":t.r==="value"?"var(--buy-value)":"var(--buy-trend)";
     el("circle",{cx:X(i),cy:Y(t.p),r:4.5,fill:c,stroke:"var(--surface)","stroke-width":1.5},s)});
 }
 /* last-6-months close-up: D={d:[iso],p:[],sma:[],ma:[],h:[0|1]}, T=[{d,p,s:"B"|"S",r}] */
-function drawRecent(D,T){
-  const s=$("c-6m"); s.textContent=""; const n=D.d.length; if(n<2) return;
+function drawRecent(Dfull,Tall){
+  RECENT={D:Dfull,T:Tall};
+  const s=$("c-6m"); s.textContent=""; if(Dfull.d.length<2) return;
+  const [i0,i1]=Z6M.win(Dfull.d.length), cut=a=>a.slice(i0,i1+1), D={d:cut(Dfull.d),p:cut(Dfull.p),sma:cut(Dfull.sma),ma:cut(Dfull.ma),h:cut(Dfull.h)}, n=D.d.length;
+  const endD=i1<Dfull.d.length-1?Dfull.d[i1+1]:"9999", T=Tall.filter(t=>t.d<endD);
   const L=62,R=890,Tp=12,Bt=310,X=i=>L+(R-L)*i/(n-1);
   const all=[...D.p,...D.sma,...D.ma].filter(v=>v), lo=Math.min(...all)*0.97, hi=Math.max(...all)*1.03;
   const Y=v=>Bt-(Bt-Tp)*(v-lo)/(hi-lo);
   D.h.forEach((v,i)=>{if(!v)return;const x0=i?(X(i-1)+X(i))/2:X(0),x1=i<n-1?(X(i)+X(i+1))/2:X(n-1);el("rect",{x:x0,y:Tp,width:Math.max(0,x1-x0)+0.3,height:Bt-Tp,fill:"var(--accent)","fill-opacity":0.13},s)});
   const step=[1e3,2e3,5e3,1e4,2e4,5e4].find(st=>(hi-lo)/st<=6)||1e5;
   for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step){const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=big(v)}
-  let lastM=D.d[0].slice(0,7);
-  D.d.forEach((d,i)=>{const m=d.slice(0,7); if(m===lastM) return; lastM=m; const x=X(i);
-    el("line",{x1:x,x2:x,y1:Tp,y2:Bt,stroke:"var(--border)","stroke-width":1},s);
-    el("text",{x,y:Bt+16,"text-anchor":"middle",class:"tick"},s).textContent=new Date(d+"T00:00:00Z").toLocaleString("en-US",{month:"short",timeZone:"UTC"})});
+  timeAxis(s,D.d,X,Tp,Bt);
   const xs=D.d.map((_,i)=>X(i));
   el("path",{d:path(xs,D.ma.map(v=>v?Y(v):null)),fill:"none",stroke:"var(--buy-value)","stroke-width":1.5},s);
   el("path",{d:path(xs,D.sma.map(v=>v?Y(v):null)),fill:"none",stroke:"var(--ink2)","stroke-width":1.2,"stroke-dasharray":"4 4"},s);
@@ -565,7 +618,7 @@ function kpis(which){
   items.forEach(([a,b,c])=>{const d=document.createElement("div");d.className="kpi";const sp=document.createElement("span");sp.textContent=a;const bb=document.createElement("b");bb.textContent=b;const sm=document.createElement("small");sm.textContent=c;d.append(sp,bb,sm);k.appendChild(d)});
 }
 function setPeriod(which){
-  const from=which==="oos"?"2021-01-01":"2015-01-01";
+  const from=which==="oos"?"2021-01-01":"2015-01-01"; PERIOD_FROM=from; ZEQ.reset(); ZPX.reset();
   $("t-oos").setAttribute("aria-pressed",which==="oos"); $("t-full").setAttribute("aria-pressed",which==="full");
   kpis(which); drawEq(from); drawPx(from);
 }
@@ -602,6 +655,7 @@ $("share").addEventListener("click",async()=>{
 
 /* ---------- 7-day candle chart that drops down from the price pill ---------- */
 const WK={data:null,at:0,gran:0,hover:-1};
+const ZWK=makeZoom($("wk-svg"),$("z-wk"),()=>WK.data&&drawWeek(),6);
 async function weekCandles(gran){      // gran: 3600 (1h) or 21600 (6h); returns [{t,o,h,l,c}] ascending
   const end=Date.now(), start=end-7*864e5;
   try{
@@ -622,38 +676,41 @@ function wkRead(i){
   out.append(wkWhen(k.t)+(i===a.length-1?" (now)":"")+"  ·  "); add("O",k.o); add("H",k.h); add("L",k.l); add("C",k.c);
 }
 function drawWeek(){
-  const s=$("wk-svg"); s.textContent=""; const a=WK.data.a, n=a.length;
+  const s=$("wk-svg"); s.textContent=""; const full=WK.data.a, [o,oe]=ZWK.win(full.length), a=full.slice(o,oe+1), n=a.length;
   const W=Math.max(280,Math.round(s.getBoundingClientRect().width)||900), H=W<600?230:300;   // draw in real pixels so labels stay readable
   s.setAttribute("viewBox",`0 0 ${W} ${H}`);
   const L=4,R=W-74,T=10,B=H-26, step=(R-L)/n, cw=Math.max(1.5,step*0.62);
   const lo=Math.min(...a.map(k=>k.l)), hi=Math.max(...a.map(k=>k.h)), pad=(hi-lo)*0.08, y0=lo-pad, y1=hi+pad;
   const X=i=>L+step*(i+0.5), Y=v=>B-(B-T)*(v-y0)/(y1-y0);
   const st=[100,200,250,500,1000,2000,2500,5000].find(v=>(y1-y0)/v<=(H<300?4:5))||10000;
-  const tagY=Y(a[n-1].c);
+  const tagY=oe===full.length-1?Y(a[n-1].c):-1e9;
   for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);if(Math.abs(y-tagY)>15)el("text",{x:R+8,y:y+3.5,class:"tick"},s).textContent=usd(v)}
-  let lastDay=new Date(a[0].t).getDate();
-  a.forEach((k,i)=>{const d=new Date(k.t); if(d.getDate()===lastDay) return; lastDay=d.getDate(); const x=L+step*i;
+  const hrs=(a[n-1].t-a[0].t)/36e5, byHour=hrs<60, hStep=hrs<18?3:6; let lastKey=null, lastX=-1e9;
+  a.forEach((k,i)=>{const d=new Date(k.t), key=byHour?Math.floor(k.t/(hStep*36e5)):d.getDate();
+    if(i===0){lastKey=key;return} if(key===lastKey) return; lastKey=key; const x=L+step*i; if(x-lastX<44) return; lastX=x;
     el("line",{x1:x,x2:x,y1:T,y2:B,stroke:"var(--border)","stroke-width":1,"stroke-dasharray":"2 4"},s);
-    el("text",{x:x+4,y:B+18,class:"tick"},s).textContent=d.toLocaleDateString(undefined,{weekday:"short"})});
+    el("text",{x:x+4,y:B+18,class:"tick"},s).textContent=byHour?(d.getHours()===0?d.toLocaleDateString(undefined,{weekday:"short"}):d.toLocaleTimeString(undefined,{hour:"numeric"})):d.toLocaleDateString(undefined,{weekday:"short"})});
   const cross=el("line",{x1:0,x2:0,y1:T,y2:B,stroke:"var(--ink3)","stroke-width":1,opacity:0},s);
   a.forEach((k,i)=>{const up=k.c>=k.o, col=up?"var(--buy-trend)":"var(--sell)", x=X(i);
     const g=el("g",{class:"cd",style:`animation-delay:${Math.round(i/n*380)}ms`},s);
     el("line",{x1:x,x2:x,y1:Y(k.h),y2:Y(k.l),stroke:col,"stroke-width":1.2},g);
     const top=Y(Math.max(k.o,k.c)), bot=Y(Math.min(k.o,k.c));
     el("rect",{x:x-cw/2,y:top,width:cw,height:Math.max(1,bot-top),fill:col,rx:Math.min(1.5,cw/4)},g)});
-  const last=a[n-1].c, ly=Y(last);
-  el("line",{x1:L,x2:R,y1:ly,y2:ly,stroke:"var(--accent)","stroke-width":1,"stroke-dasharray":"3 3"},s);
-  const tag=el("g",{},s); el("rect",{x:R+2,y:ly-10,width:76,height:20,rx:4,fill:"var(--accent)"},tag);
-  el("text",{x:R+8,y:ly+4,class:"tick",style:"fill:#fff"},tag).textContent=usd(last);
+  if(oe===full.length-1){               // current-price line only when the latest candle is in view
+    const last=a[n-1].c, ly=Y(last);
+    el("line",{x1:L,x2:R,y1:ly,y2:ly,stroke:"var(--accent)","stroke-width":1,"stroke-dasharray":"3 3"},s);
+    const tag=el("g",{},s); el("rect",{x:R+2,y:ly-10,width:76,height:20,rx:4,fill:"var(--accent)"},tag);
+    el("text",{x:R+8,y:ly+4,class:"tick",style:"fill:#fff"},tag).textContent=usd(last);
+  }
   const pick=e=>{const b=s.getBoundingClientRect(), vx=(e.clientX-b.left)/b.width*W, i=Math.max(0,Math.min(n-1,Math.floor((vx-L)/step)));
-    cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i)); cross.setAttribute("opacity",1); wkRead(i)};
+    cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i)); cross.setAttribute("opacity",1); wkRead(o+i)};
   s.onpointermove=pick; s.onpointerdown=pick;
-  s.onpointerleave=()=>{cross.setAttribute("opacity",0); wkRead(n-1)};
-  const first=a[0].o, chg=last/first-1;
-  $("wk-px").textContent=usd(last); const c=$("wk-chg"); c.textContent=(chg>=0?"+":"−")+Math.abs(chg*100).toFixed(1)+"% this week"; c.className=chg>=0?"up":"down";
-  $("wk-range").textContent=`7-day low ${usd(lo)} · high ${usd(hi)}`;
+  s.onpointerleave=()=>{cross.setAttribute("opacity",0); wkRead(full.length-1)};
+  const now=full[full.length-1].c, chg=now/full[0].o-1, wlo=Math.min(...full.map(k=>k.l)), whi=Math.max(...full.map(k=>k.h));
+  $("wk-px").textContent=usd(now); const c=$("wk-chg"); c.textContent=(chg>=0?"+":"−")+Math.abs(chg*100).toFixed(1)+"% this week"; c.className=chg>=0?"up":"down";
+  $("wk-range").textContent=`7-day low ${usd(wlo)} · high ${usd(whi)}`;
   $("wk-src").textContent=(WK.gran===3600?"1-hour":"6-hour")+" candles · "+WK.data.src;
-  wkRead(n-1);
+  wkRead(full.length-1);
 }
 async function loadWeek(){
   const gran=$("wk").getBoundingClientRect().width<600?21600:3600;
@@ -665,7 +722,7 @@ function setWeek(open){
   const d=$("wk"), btn=$("ticker");
   d.classList.toggle("open",open); d.setAttribute("aria-hidden",!open); btn.setAttribute("aria-expanded",open);
   $("wk-close").tabIndex=open?0:-1;
-  if(open){ if(WK.data) drawWeek(); loadWeek(); }
+  if(open){ const sv=$("wk-svg"); ZWK.reset(); sv.classList.add("anim"); setTimeout(()=>sv.classList.remove("anim"),1100); if(WK.data) drawWeek(); loadWeek(); }
 }
 $("ticker").addEventListener("click",()=>setWeek($("ticker").getAttribute("aria-expanded")!=="true"));
 $("wk-close").addEventListener("click",()=>{ setWeek(false); $("ticker").focus(); });
