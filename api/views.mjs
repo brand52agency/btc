@@ -7,6 +7,9 @@ const env = suffix => Object.entries(process.env).find(([k, v]) => k.endsWith(su
 const URL = env("KV_REST_API_URL") || env("UPSTASH_REDIS_REST_URL");
 const TOKEN = env("KV_REST_API_TOKEN") || env("UPSTASH_REDIS_REST_TOKEN");
 const KEY = "pageviews:home";
+// Starting number for the displayed count. The site had 3 real views when this
+// was set, so the page showed 2,100 at that point; each new view adds 1.
+const OFFSET = 2097;
 
 async function redis(cmd) {
   const r = await fetch(`${URL}/${cmd}/${KEY}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
@@ -24,7 +27,7 @@ function reply(body, status = 200) {
 async function handle(cmd) {
   if (!URL || !TOKEN) return reply({ error: "counter not configured" }, 503);
   try {
-    return reply({ views: await redis(cmd) });
+    return reply({ views: OFFSET + (await redis(cmd)) });
   } catch (e) {
     return reply({ error: "counter unavailable" }, 502);
   }
