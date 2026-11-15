@@ -92,6 +92,11 @@ section{padding-top:72px;display:flex;flex-direction:column;gap:20px}
 .hero h1{font-size:clamp(34px,6vw,60px);line-height:1.04;font-weight:600;max-width:16ch}
 .hero h1 em{font-style:normal;color:var(--accent)}
 .hero .lede{font-size:16px;max-width:58ch}
+.who{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:760px}
+@media (max-width:640px){.who{grid-template-columns:1fr}}
+.who>div{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:14.5px;color:var(--ink2)}
+.who b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.who>div.act{border-color:var(--accent);background:var(--accent-dim)}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:8px}
 .stats>div{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
 .stats span{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
@@ -342,7 +347,8 @@ ol.rules li b{font-size:13px}
   <span class="eyebrow"><span class="dot"></span>Weekly signal · Trend + Value</span>
   <span class="pill p-HOLD" id="pill">Hold</span>
   <h1 id="headline">Waiting for this week's signal</h1>
-  <p class="lede" id="note">Updated automatically from live Bitcoin prices. The signal changes only on Sunday's daily close (8 PM ET).</p>
+  <p class="lede" id="note">Updated automatically from live Bitcoin prices. The signal only changes after Sunday's daily close.</p>
+  <div class="who" id="who" hidden></div>
   <div class="stats">
     <div><span>BTC · Sunday close</span><b id="s-price">—</b><small id="s-date">&nbsp;</small></div>
     <div><span>150-day avg</span><b id="s-sma">—</b><small id="s-trend">&nbsp;</small></div>
@@ -584,7 +590,7 @@ function nextCheck(){ const t=new Date(); t.setUTCHours(0,0,0,0); t.setUTCDate(t
   return t.toLocaleString(undefined,{weekday:"short",hour:"numeric",minute:"2-digit"}); }
 
 /* ---------- live hero ---------- */
-const HEAD = {BUY:{value:"Buy Bitcoin: it's in the <em>value zone</em>",trend:"Buy Bitcoin: the <em>trend turned up</em>"},SELL:"Sell Bitcoin: <em>move to cash</em>",HOLD1:"Keep holding. <em>No trade</em> this week.",HOLD0:"Stay in cash. <em>No trade</em> this week."};
+const HEAD = {BUY:{value:"Buy Bitcoin: it's in the <em>value zone</em>",trend:"Buy Bitcoin: the <em>trend turned up</em>"},SELL:"Sell Bitcoin: <em>move to cash</em>",HOLD1:"Signal: be in <em>Bitcoin</em>",HOLD0:"Signal: stay in <em>cash</em>"};
 function setHeadline(html){ const h=$("headline"); h.textContent=""; html.split(/(<em>.*?<\/em>)/).forEach(part=>{ if(part.startsWith("<em>")){const e=document.createElement("em");e.textContent=part.slice(4,-5);h.appendChild(e);} else h.append(part); }); }
 function renderHero(r){
   latest=r;
@@ -593,6 +599,12 @@ function renderHero(r){
   $("note").textContent = r.action!=="HOLD" ? r.note
     : r.hold ? (r.trend==="UP" ? "Bitcoin closed above its 150-day average, so the trend rule says stay in." : "Bitcoin is below its 200-week average, the value zone, so stay in.")
     : "Bitcoin is in a downtrend but not yet in the value zone. Cash is the safer seat.";
+  const who=$("who"); who.textContent=""; who.hidden=r.action!=="HOLD";
+  if(r.action==="HOLD"){                 // same signal, two starting points: already positioned vs. not yet
+    const rows=r.hold?[["Already in Bitcoin?","Keep holding. No trade this week.",0],["New money?","The signal says be in Bitcoin, so this is a time to buy.",1]]
+                     :[["Already in cash?","Stay put. No trade this week.",0],["Still holding Bitcoin?","The signal says be in cash, so the strategy would sell.",1]];
+    rows.forEach(([h,t,act])=>{const d=document.createElement("div");if(act)d.className="act";const b=document.createElement("b");b.textContent=h;d.append(b,t);who.appendChild(d)});
+  }
   $("s-price").textContent=usd(r.price); $("s-date").textContent="Week of "+r.date;
   $("s-sma").textContent=usd(r.sma150); $("s-trend").textContent=r.trend==="UP"?"Trend up ▲":"Trend down ▼"; $("s-trend").className=r.trend==="UP"?"up":"down";
   $("s-ma").textContent=usd(r.ma200w); $("s-ratio").textContent=r.ratio.toFixed(2)+"× · "+r.zone;
@@ -653,11 +665,13 @@ function calc(){
     pill("BUY","Buy");
     add("div","big",`Buy <em>${usd(cash)}</em> of Bitcoin`);
     add("p","",`${signal} ${why} You have ${usd(cash)} in cash waiting, so the strategy moves it into Bitcoin (about ${btcFmt(cash/price)} BTC).`);
+    if(latest.action==="HOLD") add("p","muted","The signal says “hold” for people who are already in. Your cash isn't in yet, so buying gets you to the same position.");
     const ol=document.createElement("ol");["Open your exchange (for example Coinbase) and choose Buy Bitcoin.",`Enter ${usd(cash)} as the amount.`,"A limit order at the current price usually has lower fees than a market order.","Then leave it until the next signal."].forEach(t=>{const li=document.createElement("li");li.textContent=t;ol.appendChild(li)});out.appendChild(ol);
   } else if(!inBtc && btc>0){
     pill("SELL","Sell");
     add("div","big",`Sell <em>${btcFmt(btc)} BTC</em> (about ${usd(btc*price)})`);
     add("p","",`${signal} ${why} The strategy moves everything to cash and waits for a better moment to buy back in.`);
+    if(latest.action==="HOLD") add("p","muted","The signal says “hold” for people who are already in cash. You still hold Bitcoin, so selling gets you to the same position.");
     const ol=document.createElement("ol");["Open your exchange and choose Sell Bitcoin.",`Sell all ${btcFmt(btc)} BTC.`,"Keep the cash on hand. Selling can create a taxable gain, so keep a record.","Then wait for the next buy signal."].forEach(t=>{const li=document.createElement("li");li.textContent=t;ol.appendChild(li)});out.appendChild(ol);
   } else {
     pill("HOLD","No trade");
