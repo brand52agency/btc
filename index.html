@@ -103,6 +103,10 @@ section{padding-top:72px;display:flex;flex-direction:column;gap:20px}
 .stats b{font:500 20px var(--mono);font-variant-numeric:tabular-nums}
 .stats small{font-size:12px;color:var(--ink2)}
 @media (max-width:720px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.who .coinbtn{margin-top:10px}
+.coinbtn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:0;border-radius:999px;background:var(--accent);color:#fff;font:700 12.5px var(--sans);letter-spacing:.01em;cursor:pointer;box-shadow:0 4px 14px -6px rgba(238,104,51,.7);transition:transform .15s,filter .15s}
+.coinbtn:hover{transform:translateY(-1px);filter:brightness(1.08)} .coinbtn:active{transform:translateY(1px)}
+.coinbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #coinrain{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;transition:opacity .8s ease}
 .p-BUY.party{cursor:pointer;box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:buyglow 1.6s ease-in-out 3}
 @keyframes buyglow{50%{box-shadow:0 0 0 8px rgba(52,211,153,0)}}
@@ -603,7 +607,9 @@ function renderHero(r){
   if(r.action==="HOLD"){                 // same signal, two starting points: already positioned vs. not yet
     const rows=r.hold?[["Already in Bitcoin?","Keep holding. No trade this week.",0],["New money?","The signal says be in Bitcoin, so this is a time to buy.",1]]
                      :[["Already in cash?","Stay put. No trade this week.",0],["Still holding Bitcoin?","The signal says be in cash, so the strategy would sell.",1]];
-    rows.forEach(([h,t,act])=>{const d=document.createElement("div");if(act)d.className="act";const b=document.createElement("b");b.textContent=h;d.append(b,t);who.appendChild(d)});
+    rows.forEach(([h,t,act])=>{const d=document.createElement("div");if(act)d.className="act";const b=document.createElement("b");b.textContent=h;d.append(b,t);
+      if(act&&r.hold){ const btn=document.createElement("button"); btn.type="button"; btn.className="coinbtn"; btn.textContent="₿ Buy Bitcoin"; btn.title="Make it rain"; btn.onclick=()=>rainCoins(); d.append(document.createElement("br"),btn); }
+      who.appendChild(d)});
   }
   $("s-price").textContent=usd(r.price); $("s-date").textContent="Week of "+r.date;
   $("s-sma").textContent=usd(r.sma150); $("s-trend").textContent=r.trend==="UP"?"Trend up ▲":"Trend down ▼"; $("s-trend").className=r.trend==="UP"?"up":"down";
