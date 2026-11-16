@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bitcoin Power Law · BTC Buy Strategy</title>
+<meta name="description" content="Bitcoin's power law: the long-term fair value line, the floor every bear market has found, and where today's price sits.">
+<link rel="canonical" href="https://www.bitcoinbuystrategy.com/power-law">
+<meta property="og:type" content="website"><meta property="og:site_name" content="BTC Buy Strategy">
+<meta property="og:title" content="Bitcoin Power Law · BTC Buy Strategy">
+<meta property="og:description" content="Bitcoin's long-term fair value line and where today's price sits.">
+<meta property="og:url" content="https://www.bitcoinbuystrategy.com/power-law">
+<meta property="og:image" content="https://www.bitcoinbuystrategy.com/icons/icon-512.png"><meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="BTC Buy"><meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.modes{display:flex;gap:6px;margin-bottom:10px}
+.modes button{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink2);font:600 12.5px var(--sans);cursor:pointer}
+.modes button[aria-pressed="true"]{color:#fff;background:var(--accent);border-color:var(--accent)}
+.bars{display:grid;gap:10px;margin-top:6px}
+.bar{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:10px;font:13px var(--mono);color:var(--ink2)}
+.bar .track{height:14px;border-radius:7px;background:var(--raised);overflow:hidden}
+.bar .fill{height:100%;border-radius:7px}
+.bar b{color:var(--ink);font-weight:500;text-align:right}
+.halo{paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font:600 12px var(--sans)}
+@media (max-width:640px){.bar{font-size:14px}}
+</style>
+</head><body>
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none"><i>₿</i>BTC Buy Strategy</a>
+  <span class="ticker" style="cursor:default" title="Current Bitcoin price"><span class="dot pulse"></span><b id="tk-price">BTC —</b><small id="tk-chg"></small></span>
+</nav>
+<nav class="sitenav" aria-label="Pages"><a href="/">Weekly signal</a><a href="/power-law.html" aria-current="page">Power law</a><a href="/cycles.html">4-year cycle</a></nav>
+
+<header class="hero">
+  <span class="eyebrow"><span class="dot"></span>Power law</span>
+  <h1>Bitcoin's long-term <em>growth line</em></h1>
+  <p class="lede">Over its whole 16-year history, Bitcoin's price has followed a surprisingly steady curve. That curve gives a rough "fair value" for any date, and a floor that every bear market since 2015 has bottomed near.</p>
+  <div class="stats">
+    <div><span>BTC price</span><b id="s-px">—</b><small id="s-pxd">&nbsp;</small></div>
+    <div><span>Fair value today</span><b id="s-fair">—</b><small>Power-law line</small></div>
+    <div><span>Price vs fair value</span><b id="s-mult">—</b><small id="s-multd">&nbsp;</small></div>
+    <div><span>Floor today</span><b id="s-floor">—</b><small id="s-floord">&nbsp;</small></div>
+  </div>
+</header>
+
+<section>
+  <div class="head">
+    <span class="eyebrow"><span class="dot"></span>In plain English</span>
+    <h2>What the power law says</h2>
+  </div>
+  <div class="card"><ul class="plain" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px">
+    <li>Put Bitcoin's price and its age (days since the first block in January 2009) on log scales, and the whole history hugs <b>one straight line</b>. That line is the <b>fair value</b>.</li>
+    <li>Fair value keeps rising, but <b>more slowly each year</b>. It's about <b id="p-fair">—</b> today and <b id="p-fair28">—</b> by January 2028.</li>
+    <li>Bear markets have bottomed near the <b>floor</b>, about <b id="p-floor">—</b> of fair value (<span id="p-bots"></span>). Every cycle top has run <b>less far above</b> the line than the one before.</li>
+    <li>Right now Bitcoin is at <b id="p-now">—</b> of fair value. <span id="p-verdict"></span></li>
+  </ul></div>
+</section>
+
+<section>
+  <div class="card chart">
+    <div class="chead"><h3>The power law chart</h3><div class="zbar" id="z-pl"></div></div>
+    <div class="modes" role="group" aria-label="Chart style"><button type="button" id="m-time" aria-pressed="true">Over time</button><button type="button" id="m-log" aria-pressed="false">Log–log (classic)</button></div>
+    <div class="legend"><span><i style="background:var(--ink)"></i>BTC price</span><span><i style="background:var(--accent);height:3px"></i>Fair value</span><span><i style="background:var(--buy-value)"></i>Floor</span><span><i style="background:var(--accent);opacity:.5;border-top:1px dashed var(--accent);height:0"></i>Projection to 2030</span><span><i class="ci" style="background:var(--sell)"></i>Cycle top</span><span><i class="ci" style="background:var(--buy-value)"></i>Cycle bottom</span></div>
+    <svg id="c-pl" class="zoomable" viewBox="0 0 900 380" role="img" aria-label="Bitcoin price with its power-law fair value and floor lines"></svg>
+    <p class="note" id="pl-note" style="margin-top:8px">Loading full price history…</p>
+  </div>
+</section>
+
+<section>
+  <div class="card chart">
+    <div class="chead"><h3>Price ÷ fair value</h3><div class="zbar" id="z-osc"></div></div>
+    <p class="note" style="margin-bottom:10px;font-size:13.5px">Above 1× means Bitcoin is pricier than its long-term line; below 1× means cheaper. Each wave is one cycle.</p>
+    <div class="legend"><span><i style="background:var(--ink)"></i>Price ÷ fair value</span><span><i style="background:var(--accent);height:3px"></i>1× (fair value)</span><span><i style="background:var(--buy-value)"></i>Floor</span></div>
+    <svg id="c-osc" class="zoomable" viewBox="0 0 900 300" role="img" aria-label="Bitcoin price divided by its power-law fair value over time"></svg>
+  </div>
+</section>
+
+<section>
+  <div class="two">
+    <div class="card">
+      <h3>How hot each cycle top got</h3>
+      <p class="note" style="font-size:13.5px;margin:6px 0 12px">Price at each cycle top, as a multiple of fair value that day. The tops keep shrinking.</p>
+      <div class="bars" id="tops"></div>
+    </div>
+    <div class="card">
+      <h3>Where each bear market bottomed</h3>
+      <p class="note" style="font-size:13.5px;margin:6px 0 12px">Price at each cycle bottom, as a multiple of fair value. They cluster near the floor.</p>
+      <div class="bars" id="bots"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="card">
+    <h3>Fair value and floor ahead</h3>
+    <p class="note" style="font-size:13.5px;margin:6px 0 4px">Where the lines sit on future dates if the pattern keeps holding. A model, not a promise.</p>
+    <div class="scroll"><table class="grid"><thead><tr><th>Date</th><th>Floor</th><th>Fair value</th><th>2× fair</th></tr></thead><tbody id="ahead"></tbody></table></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="legal"><h3>Not financial advice</h3><p>The power law is a curve fitted to past prices, not a law of nature, and it can stop working at any time. Nothing here is a recommendation to buy or sell. See the full disclaimer on the <a href="/#disclaimer" style="color:var(--ink2)">main page</a>.</p></div>
+  <p>Fit: log<sub>10</sub>(price) = a + b·log<sub>10</sub>(days since Jan 3, 2009), least squares over every daily close since <span id="f-start">2010</span>. <span id="f-eq"></span> Floor = lowest confirmed bear-market bottom ÷ fair value (<span id="f-floor"></span>). The sharpest single-day dip since 2015 was <span id="f-low"></span>. Data: <span id="f-src">blockchain.com</span> daily BTC/USD.</p>
+</footer>
+</div>
+<script src="/assets/common.js"></script>
+<script>
+(async()=>{
+  const H=await loadHistory(), PL=powerLaw(H), C=findCycles(H), n=H.t.length, now=H.t[n-1], px=H.p[n-1], f=PL.fair, mult=px/f(now);
+  const x=v=>v.toFixed(2)+"×", Y28=Date.UTC(2028,0,1), END=Date.UTC(2030,0,1);
+  // stats + plain-English lines
+  $("s-px").textContent=usd(px); $("s-pxd").textContent="Close "+fmtDate(now);
+  $("s-fair").textContent=usd(f(now)); $("s-mult").textContent=x(mult);
+  $("s-multd").textContent=mult<1?Math.round((1-mult)*100)+"% below fair value":Math.round((mult-1)*100)+"% above fair value";
+  $("s-floor").textContent=usd(f(now)*PL.floor); $("s-floord").textContent=x(PL.floor)+" fair · lowest bear-market bottom";
+  $("p-fair").textContent=big(f(now)); $("p-fair28").textContent=big(f(Y28)); $("p-floor").textContent=x(PL.floor); $("p-bots").textContent=C.filter(c=>c.botDone&&c.iBot>=0).map(c=>H.d[c.iBot].slice(0,4)+": "+x(H.p[c.iBot]/f(H.t[c.iBot]))).join(", "); $("p-now").textContent=x(mult);
+  $("p-verdict").textContent= mult<PL.floor*1.15?"That's right around the floor, where past bear markets have bottomed."
+    : mult<1?"That's below the line: historically the cheaper half of the range."
+    : mult<2?"That's above the line, but well short of where past tops peaked."
+    : "That's well above the line, the zone where past cycles topped.";
+  $("f-start").textContent=H.d[0].slice(0,4); $("f-src").textContent=H.src==="saved copy"?"saved copy of blockchain.com":"blockchain.com (live)";
+  $("f-floor").textContent=fmtDate(PL.floorT)+", "+x(PL.floor); $("f-low").textContent=x(PL.low)+" on "+fmtDate(PL.lowT); $("f-eq").textContent=`Here a = ${PL.a.toFixed(3)}, b = ${PL.b.toFixed(3)}.`;
+  $("pl-note").textContent=`Daily prices since ${fmtDate(H.t[0])}, through ${fmtDate(now)}. Dashed lines show where fair value and the floor head through 2030.`;
+
+  // cycle tops / bottoms as bars (log-ish width so 10× and 1× both read)
+  const barRow=(host,label,m,col,maxM)=>{ const r=document.createElement("div"); r.className="bar";
+    const w=Math.max(4,Math.log10(m*10)/Math.log10(maxM*10)*100);
+    r.innerHTML=`<span></span><div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div><b></b>`;
+    r.children[0].textContent=label; r.children[2].textContent=x(m); host.appendChild(r); };
+  C.forEach(c=>{ const yr=H.d[c.iTop].slice(0,4); barRow($("tops"),yr+(c.topDone?"":"*"),H.p[c.iTop]/f(H.t[c.iTop]),"var(--sell)",12); });
+  C.forEach(c=>{ if(c.iBot<0) return; barRow($("bots"),H.d[c.iBot].slice(0,4)+(c.botDone?"":"*"),H.p[c.iBot]/f(H.t[c.iBot]),"var(--buy-value)",1.2); });
+  if(C.some(c=>!c.botDone)){ const nt=document.createElement("p"); nt.className="note"; nt.style.marginTop="8px"; nt.textContent="* Current cycle: lowest point so far, not yet confirmed."; $("bots").after(nt); }
+
+  // fair value ahead
+  [2027,2028,2029,2030].forEach(yr=>{ const t=Date.UTC(yr,0,1), tr=document.createElement("tr");
+    [`Jan 1, ${yr}`,usd(f(t)*PL.floor),usd(f(t)),usd(f(t)*2)].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)}); $("ahead").appendChild(tr); });
+
+  // ---------- main chart ----------
+  let mode="time";
+  const SL=1000, ZPL=makeZoom($("c-pl"),$("z-pl"),drawPL,40);
+  function drawPL(){
+    const s=$("c-pl"); s.textContent=""; const {W,H:Hh,L,R}=fitSvg(s,380,300), T=12, B=Hh-28;
+    const logx=mode==="log", d0=daysSince(H.t[0]), d1=daysSince(END), xv=d=>logx?Math.log10(d):d;   // x in "days since genesis"
+    const [w0,w1]=ZPL.win(SL), xa=xv(d0)+(xv(d1)-xv(d0))*w0/(SL-1), xb=xv(d0)+(xv(d1)-xv(d0))*w1/(SL-1);
+    const X=d=>L+(R-L)*(xv(d)-xa)/(xb-xa), vis=d=>xv(d)>=xa&&xv(d)<=xb;
+    // y range from what's visible
+    let lo=Infinity,hi=0; H.t.forEach((t,i)=>{const d=daysSince(t); if(vis(d)){lo=Math.min(lo,H.p[i],f(t)*PL.floor);hi=Math.max(hi,H.p[i],f(t))}});
+    const tEnd=GENESIS+(logx?10**xb:xb)*864e5; if(tEnd>now){ hi=Math.max(hi,f(Math.min(tEnd,END))); }
+    lo*=.7; hi*=1.4; const Y=v=>B-(B-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
+    let tk=logTicks(lo,hi); const room=(B-T)/22;                       // keep labels at least ~22px apart
+    if(tk.length>room) tk=tk.filter(v=>Math.abs(Math.log10(v)-Math.round(Math.log10(v)))<1e-9);
+    if(tk.length>room) tk=tk.filter((_,i)=>i%2===0);
+    tk.forEach(v=>{const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=money(v)});
+    // year gridlines (Jan 1), thinned by spacing
+    let lastX=-1e9; for(let yr=2010;yr<=2030;yr++){ const d=daysSince(Date.UTC(yr,0,1)); if(d<=0||!vis(d)) continue; const xx=X(d); if(xx-lastX<44) continue; lastX=xx;
+      el("line",{x1:xx,x2:xx,y1:T,y2:B,stroke:"var(--border)","stroke-width":1},s); el("text",{x:xx,y:B+16,"text-anchor":"middle",class:"tick"},s).textContent=yr; }
+    // fair value + floor: solid through today, dashed beyond
+    const line=(t0,t1,mul,col,w,dash)=>{ const pts=[]; for(let k=0;k<=160;k++){ const t=t0+(t1-t0)*k/160, d=daysSince(t); if(vis(d)) pts.push([X(d),Y(f(t)*mul)]); }
+      if(pts.length>1) el("path",{d:"M"+pts.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join("L"),fill:"none",stroke:col,"stroke-width":w,"stroke-dasharray":dash||"none",opacity:dash?.7:1},s); };
+    const tStart=GENESIS+(logx?10**Math.max(xa,Math.log10(d0)):Math.max(xa,d0))*864e5;
+    line(tStart,now,1,"var(--accent)",2.2); line(now,END,1,"var(--accent)",2,"6 5");
+    line(tStart,now,PL.floor,"var(--buy-value)",1.6); line(now,END,PL.floor,"var(--buy-value)",1.5,"6 5");
+    // price (thinned to ~2 points per pixel)
+    const idx=[]; H.t.forEach((t,i)=>{ if(vis(daysSince(t))) idx.push(i) }); const step=Math.max(1,Math.floor(idx.length/((R-L)*2)));
+    const pts=idx.filter((_,k)=>k%step===0||k===idx.length-1);
+    el("path",{d:path(pts.map(i=>X(daysSince(H.t[i]))),pts.map(i=>Y(H.p[i]))),fill:"none",stroke:"var(--ink)","stroke-width":1.4,"stroke-linejoin":"round"},s);
+    // cycle tops / bottoms
+    C.forEach(c=>{ [[c.iTop,"var(--sell)"],[c.iBot,"var(--buy-value)"]].forEach(([i,col])=>{ if(i<0) return; const d=daysSince(H.t[i]); if(!vis(d)) return;
+      el("circle",{cx:X(d),cy:Y(H.p[i]),r:5,fill:col,stroke:"var(--surface)","stroke-width":1.5},s); }); });
+    // today
+    if(vis(daysSince(now))){ const cx=X(daysSince(now)), cy=Y(px), left=cx>R-90; el("circle",{cx,cy,r:4.5,fill:"var(--ink)",stroke:"var(--surface)","stroke-width":1.5},s);
+      el("text",{x:left?cx-8:cx+8,y:cy+18,"text-anchor":left?"end":"start",class:"tick halo",style:"fill:var(--ink)"},s).textContent="Today "+big(px); }
+  }
+  [["m-time","time"],["m-log","log"]].forEach(([id,m])=>$(id).onclick=()=>{ mode=m; $("m-time").setAttribute("aria-pressed",m==="time"); $("m-log").setAttribute("aria-pressed",m==="log"); ZPL.reset(); drawPL(); });
+
+  // ---------- oscillator ----------
+  const from=H.t.findIndex(t=>t>=Date.UTC(2011,0,1)), OD=H.d.slice(from), OM=H.t.slice(from).map((t,k)=>H.p[from+k]/f(t));
+  const ZO=makeZoom($("c-osc"),$("z-osc"),drawOsc,60);
+  function drawOsc(){
+    const s=$("c-osc"); s.textContent=""; const {H:Hh,L,R}=fitSvg(s,300,240), T=10, B=Hh-28;
+    const [i0,i1]=ZO.win(OD.length), d=OD.slice(i0,i1+1), m=OM.slice(i0,i1+1), N=d.length, X=i=>L+(R-L)*i/(N-1);
+    const lo=Math.min(...m,PL.floor)*.8, hi=Math.max(...m,1.2)*1.25, Y=v=>B-(B-T)*(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo));
+    [.25,.5,1,2,5,10,20].filter(v=>v>=lo&&v<=hi).forEach(v=>{const y=Y(v);el("line",{x1:L,x2:R,y1:y,y2:y,stroke:"var(--border)","stroke-width":1},s);el("text",{x:L-8,y:y+3.5,"text-anchor":"end",class:"tick"},s).textContent=v+"×"});
+    timeAxis(s,d,X,T,B);
+    el("rect",{x:L,y:Y(PL.floor),width:R-L,height:Math.max(0,B-Y(PL.floor)),fill:"var(--buy-value)","fill-opacity":.08},s);
+    el("line",{x1:L,x2:R,y1:Y(1),y2:Y(1),stroke:"var(--accent)","stroke-width":2},s);
+    el("line",{x1:L,x2:R,y1:Y(PL.floor),y2:Y(PL.floor),stroke:"var(--buy-value)","stroke-width":1.5,"stroke-dasharray":"5 4"},s);
+    const step=Math.max(1,Math.floor(N/((R-L)*2))), k=[...Array(N).keys()].filter(i=>i%step===0||i===N-1);
+    el("path",{d:path(k.map(X),k.map(i=>Y(m[i]))),fill:"none",stroke:"var(--ink)","stroke-width":1.4},s);
+    if(i1===OD.length-1){ const cx=X(N-1), cy=Y(m[N-1]); el("circle",{cx,cy,r:4,fill:"var(--accent)"},s); el("text",{x:cx-8,y:cy+18,"text-anchor":"end",class:"tick halo",style:"fill:var(--ink)"},s).textContent="Now "+x(m[N-1]); }
+  }
+  drawPL(); drawOsc();
+  let lw=innerWidth; addEventListener("resize",()=>{ if(innerWidth!==lw){ lw=innerWidth; drawPL(); drawOsc(); } });
+})().catch(e=>{ $("pl-note").textContent="Couldn't load the price history right now. Please refresh in a minute."; console.error(e); });
+</script>
+</body></html>
